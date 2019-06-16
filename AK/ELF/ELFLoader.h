@@ -17,11 +17,9 @@ public:
     ~ELFLoader();
 
     bool load();
-#if defined(KERNEL)
     Function<void*(VirtualAddress, size_t, size_t, bool, bool, const String&)> alloc_section_hook;
     Function<void*(VirtualAddress, size_t, size_t, size_t, bool r, bool w, bool x, const String&)> map_section_hook;
     VirtualAddress entry() const { return m_image.entry(); }
-#endif
     char* symbol_ptr(const char* name);
 
     bool has_symbols() const { return m_image.symbol_count(); }

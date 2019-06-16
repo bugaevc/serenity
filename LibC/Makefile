@@ -11,7 +11,9 @@ AK_OBJS = \
     ../AK/JsonArray.o \
     ../AK/JsonObject.o \
     ../AK/JsonParser.o \
-    ../AK/MappedFile.o
+    ../AK/MappedFile.o \
+    ../AK/ELF/ELFImage.o \
+    ../AK/ELF/ELFLoader.o
 
 LIBC_OBJS = \
        SharedBuffer.o \
