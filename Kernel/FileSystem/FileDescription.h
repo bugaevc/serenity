@@ -4,12 +4,12 @@
 #include <AK/ByteBuffer.h>
 #include <AK/CircularQueue.h>
 #include <AK/RefCounted.h>
+#include <AK/VirtualAddress.h>
 #include <Kernel/FileSystem/FIFO.h>
 #include <Kernel/FileSystem/Inode.h>
 #include <Kernel/FileSystem/InodeMetadata.h>
 #include <Kernel/FileSystem/VirtualFileSystem.h>
 #include <Kernel/Net/Socket.h>
-#include <Kernel/VirtualAddress.h>
 
 class File;
 class TTY;

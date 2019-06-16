@@ -10,6 +10,7 @@
 #include <AK/RefCounted.h>
 #include <AK/Types.h>
 #include <AK/Vector.h>
+#include <AK/VirtualAddress.h>
 #include <AK/Weakable.h>
 #include <Kernel/Arch/i386/CPU.h>
 #include <Kernel/FileSystem/InodeIdentifier.h>
@@ -17,7 +18,6 @@
 #include <Kernel/VM/PhysicalRegion.h>
 #include <Kernel/VM/Region.h>
 #include <Kernel/VM/VMObject.h>
-#include <Kernel/VirtualAddress.h>
 
 #define PAGE_ROUND_UP(x) ((((dword)(x)) + PAGE_SIZE - 1) & (~(PAGE_SIZE - 1)))
 

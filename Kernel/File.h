@@ -4,9 +4,9 @@
 #include <AK/RefCounted.h>
 #include <AK/NonnullRefPtr.h>
 #include <AK/Types.h>
+#include <AK/VirtualAddress.h>
 #include <Kernel/KResult.h>
 #include <Kernel/UnixTypes.h>
-#include <Kernel/VirtualAddress.h>
 
 class FileDescription;
 class Process;

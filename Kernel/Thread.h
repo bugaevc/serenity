@@ -5,11 +5,11 @@
 #include <AK/OwnPtr.h>
 #include <AK/RefPtr.h>
 #include <AK/Vector.h>
+#include <AK/VirtualAddress.h>
 #include <Kernel/Arch/i386/CPU.h>
 #include <Kernel/KResult.h>
 #include <Kernel/UnixTypes.h>
 #include <Kernel/VM/Region.h>
-#include <Kernel/VirtualAddress.h>
 
 class Alarm;
 class FileDescription;

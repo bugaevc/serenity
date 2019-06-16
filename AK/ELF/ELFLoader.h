@@ -4,10 +4,10 @@
 #include <AK/HashMap.h>
 #include <AK/OwnPtr.h>
 #include <AK/Vector.h>
+#include <AK/VirtualAddress.h>
 #include <AK/ELF/ELFImage.h>
 
 #ifdef KERNEL
-#include <Kernel/VirtualAddress.h>
 class Region;
 #endif
 
