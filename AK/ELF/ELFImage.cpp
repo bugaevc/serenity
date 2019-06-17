@@ -1,5 +1,10 @@
 #include "ELFImage.h"
-#include <AK/kstdio.h>
+#if defined(KERNEL)
+#    include <AK/kstdio.h>
+#else
+#    include <stdio.h>
+#    define kprintf printf
+#endif
 
 ELFImage::ELFImage(const byte* buffer)
     : m_buffer(buffer)
@@ -110,7 +115,7 @@ bool ELFImage::parse()
             m_symbol_table_section_index = i;
         }
         if (sh.sh_type == SHT_STRTAB && i != header().e_shstrndx) {
-            ASSERT(!m_string_table_section_index);
+            // ASSERT(!m_string_table_section_index);
             m_string_table_section_index = i;
         }
     }
