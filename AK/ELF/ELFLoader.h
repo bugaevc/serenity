@@ -13,18 +13,17 @@ class Region;
 
 class ELFLoader {
 public:
-    explicit ELFLoader(const byte*);
     ~ELFLoader();
 
+    void add_image(OwnPtr<ELFImage> image);
+
     bool load();
-    Function<void*(VirtualAddress, size_t, size_t, bool, bool, const String&)> alloc_section_hook;
-    Function<void*(VirtualAddress, size_t, size_t, size_t, bool r, bool w, bool x, const String&)> map_section_hook;
-    VirtualAddress entry() const { return m_image.entry(); }
     char* symbol_ptr(const char* name);
 
-    bool has_symbols() const { return m_image.symbol_count(); }
-
+    bool has_symbols() const { return m_images[0]->symbol_count(); }
     String symbolicate(dword address) const;
+
+    VirtualAddress entry() const { return m_images[0]->entry(); }
 
 private:
     bool layout();
@@ -44,7 +43,7 @@ private:
         char* ptr { nullptr };
         unsigned size { 0 };
     };
-    ELFImage m_image;
+    Vector<OwnPtr<ELFImage>> m_images;
 
     struct SortedSymbol {
         dword address;

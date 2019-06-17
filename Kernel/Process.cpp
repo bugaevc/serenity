@@ -6,6 +6,7 @@
 #include <AK/Types.h>
 #include <Kernel/Arch/i386/CPU.h>
 #include <Kernel/Devices/NullDevice.h>
+#include <Kernel/ExecutableImage.h>
 #include <Kernel/FileSystem/Custody.h>
 #include <Kernel/FileSystem/FIFO.h>
 #include <Kernel/FileSystem/FileDescription.h>
@@ -347,31 +348,9 @@ int Process::do_exec(String path, Vector<String> arguments, Vector<String> envir
         // Okay, here comes the sleight of hand, pay close attention..
         auto old_regions = move(m_regions);
         m_regions.append(*region);
-        loader = make<ELFLoader>(region->vaddr().as_ptr());
-        loader->map_section_hook = [&](VirtualAddress vaddr, size_t size, size_t alignment, size_t offset_in_image, bool is_readable, bool is_writable, bool is_executable, const String& name) {
-            ASSERT(size);
-            ASSERT(alignment == PAGE_SIZE);
-            int prot = 0;
-            if (is_readable)
-                prot |= PROT_READ;
-            if (is_writable)
-                prot |= PROT_WRITE;
-            if (is_executable)
-                prot |= PROT_EXEC;
-            (void)allocate_region_with_vmo(vaddr, size, vmo.copy_ref(), offset_in_image, String(name), prot);
-            return vaddr.as_ptr();
-        };
-        loader->alloc_section_hook = [&](VirtualAddress vaddr, size_t size, size_t alignment, bool is_readable, bool is_writable, const String& name) {
-            ASSERT(size);
-            ASSERT(alignment == PAGE_SIZE);
-            int prot = 0;
-            if (is_readable)
-                prot |= PROT_READ;
-            if (is_writable)
-                prot |= PROT_WRITE;
-            (void)allocate_region(vaddr, size, String(name), prot);
-            return vaddr.as_ptr();
-        };
+        OwnPtr<ExecutableImage> image = make<ExecutableImage>(region->vaddr().as_ptr(), *this, vmo);
+        loader = make<ELFLoader>();
+        loader->add_image(move(image));
         bool success = loader->load();
         if (!success || !loader->entry().get()) {
             m_page_directory = move(old_page_directory);

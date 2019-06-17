@@ -96,14 +96,14 @@ unsigned ELFImage::section_count() const
 
 unsigned ELFImage::program_header_count() const
 {
-    return header().e_phnum;
+  return header().e_phnum;
 }
 
 bool ELFImage::parse()
 {
     // We only support i386.
     if (header().e_machine != 3) {
-        kprintf("ELFImage::parse(): e_machine=%u not supported!\n");
+        kprintf("ELFImage::parse(): e_machine=%u not supported!\n", header().e_machine);
         return false;
     }
 

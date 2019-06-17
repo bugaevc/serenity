@@ -9,7 +9,7 @@
 class ELFImage {
 public:
     explicit ELFImage(const byte*);
-    ~ELFImage();
+    virtual ~ELFImage();
     void dump();
     bool is_valid() const { return m_valid; }
     bool parse();
@@ -124,6 +124,9 @@ public:
     bool is_relocatable() const { return header().e_type == ET_REL; }
 
     VirtualAddress entry() const { return VirtualAddress(header().e_entry); }
+
+    virtual void* alloc_section(VirtualAddress vaddr, size_t size, size_t alignment, int prot) = 0;
+    virtual void* map_section(VirtualAddress vaddr, size_t size, size_t alignment, size_t offset_in_image, int prot) = 0;
 
 private:
     bool parse_header();

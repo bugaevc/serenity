@@ -5,6 +5,7 @@ KERNEL_OBJS = \
        kmalloc.o \
        StdLib.o \
        Arch/i386/CPU.o \
+       ExecutableImage.o \
        Process.o \
        Thread.o \
        i8253.o \
