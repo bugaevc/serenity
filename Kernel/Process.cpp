@@ -2191,11 +2191,16 @@ int Process::sys$connect(int sockfd, const sockaddr* address, socklen_t address_
         return -ENOTSOCK;
     if (description->socket_role() == SocketRole::Connected)
         return -EISCONN;
+
     auto& socket = *description->socket();
     description->set_socket_role(SocketRole::Connecting);
     auto result = socket.connect(*description, address, address_size, description->is_blocking() ? ShouldBlock::Yes : ShouldBlock::No);
+
     if (result.is_error()) {
-        description->set_socket_role(SocketRole::None);
+        if (!description->is_blocking() && result == -EINPROGRESS)
+            description->set_socket_role(SocketRole::Connecting);
+        else
+            description->set_socket_role(SocketRole::None);
         return result;
     }
     description->set_socket_role(SocketRole::Connected);

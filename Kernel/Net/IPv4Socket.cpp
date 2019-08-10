@@ -130,6 +130,16 @@ bool IPv4Socket::can_read(FileDescription& description) const
         return can_accept();
     if (protocol_is_disconnected())
         return true;
+
+    // This is sort of a hack. Normally, it's the socket-related
+    // syscall itself that updates the socket role, e.g. sys$accept()
+    // sets it to SocketRole::Accepted. However in case of a non-blocking
+    // wait for connection there's no syscall that takes the socket from
+    // SocketRole::Connecting to SocketRole::Connected; so this is the
+    // least inconvenient place to do it.
+    if (description.socket_role() == SocketRole::Connecting && m_can_read)
+        description.set_socket_role(SocketRole::Connected);
+
     return m_can_read;
 }
 
