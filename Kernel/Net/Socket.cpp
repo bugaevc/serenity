@@ -1,3 +1,4 @@
+#include <AK/StringBuilder.h>
 #include <Kernel/FileSystem/FileDescription.h>
 #include <Kernel/Net/IPv4Socket.h>
 #include <Kernel/Net/LocalSocket.h>
@@ -147,23 +148,29 @@ void Socket::load_send_deadline()
     m_send_deadline.tv_usec %= 1000000;
 }
 
-static const char* to_string(SocketRole role)
-{
-    switch (role) {
-    case SocketRole::Listener:
-        return "Listener";
-    case SocketRole::Accepted:
-        return "Accepted";
-    case SocketRole::Connected:
-        return "Connected";
-    default:
-        return "None";
-    }
-}
-
 String Socket::absolute_path(const FileDescription& description) const
 {
-    return String::format("socket:%x (role: %s)", this, ::to_string(description.socket_role()));
+    StringBuilder builder;
+    builder.appendf("socket:%x", this);
+
+    switch (description.socket_role()) {
+    case SocketRole::None:
+        break;
+    case SocketRole::Listener:
+        builder.append(" (listening)");
+        break;
+    case SocketRole::Accepted:
+        builder.append(" (accepted)");
+        break;
+    case SocketRole::Connected:
+        builder.append(" (connected)");
+        break;
+    case SocketRole::Connecting:
+        builder.append(" (connecting)");
+        break;
+    }
+
+    return builder.to_string();
 }
 
 ssize_t Socket::read(FileDescription& description, u8* buffer, ssize_t size)
