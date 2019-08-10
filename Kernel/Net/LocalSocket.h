@@ -10,6 +10,7 @@ public:
     static NonnullRefPtr<LocalSocket> create(int type);
     virtual ~LocalSocket() override;
 
+    static void for_each(Function<void(LocalSocket&)>);
 
     StringView socket_path() const;
     // ^Socket
@@ -30,6 +31,7 @@ private:
     virtual const char* class_name() const override { return "LocalSocket"; }
     virtual bool is_local() const override { return true; }
     bool has_attached_peer(const FileDescription&) const;
+    static Lockable<HashMap<FileDescription*, LocalSocket*>>& sockets_by_fd();
 
     RefPtr<FileDescription> m_file;
 

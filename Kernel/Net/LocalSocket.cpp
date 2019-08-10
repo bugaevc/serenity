@@ -1,3 +1,4 @@
+#include <AK/StringBuilder.h>
 #include <Kernel/FileSystem/FileDescription.h>
 #include <Kernel/FileSystem/VirtualFileSystem.h>
 #include <Kernel/Net/LocalSocket.h>
@@ -6,6 +7,21 @@
 #include <LibC/errno_numbers.h>
 
 //#define DEBUG_LOCAL_SOCKET
+
+void LocalSocket::for_each(Function<void(LocalSocket&)> callback)
+{
+    LOCKER(sockets_by_fd().lock());
+    for (auto it : sockets_by_fd().resource())
+        callback(*it.value);
+}
+
+Lockable<HashMap<FileDescription*, LocalSocket*>>& LocalSocket::sockets_by_fd()
+{
+    static Lockable<HashMap<FileDescription*, LocalSocket*>>* s_map;
+    if (!s_map)
+        s_map = new Lockable<HashMap<FileDescription*, LocalSocket*>>;
+    return *s_map;
+}
 
 NonnullRefPtr<LocalSocket> LocalSocket::create(int type)
 {
@@ -22,6 +38,8 @@ LocalSocket::LocalSocket(int type)
 
 LocalSocket::~LocalSocket()
 {
+    LOCKER(sockets_by_fd().lock());
+    sockets_by_fd().resource().remove(m_file);
 }
 
 bool LocalSocket::get_local_address(sockaddr* address, socklen_t* address_size)
@@ -61,7 +79,14 @@ KResult LocalSocket::bind(const sockaddr* address, socklen_t address_size)
             return KResult(-EADDRINUSE);
         return result.error();
     }
-    m_file = move(result.value());
+    {
+        LOCKER(sockets_by_fd().lock());
+        auto& sockets = sockets_by_fd().resource();
+        sockets.remove(m_file);
+        m_file = move(result.value());
+        ASSERT(!sockets.contains(m_file));
+        sockets.set(m_file, this);
+    }
 
     ASSERT(m_file->inode());
     m_file->inode()->bind_socket(*this);
@@ -91,7 +116,15 @@ KResult LocalSocket::connect(FileDescription& description, const sockaddr* addre
     auto description_or_error = VFS::the().open(safe_address, 0, 0, current->process().current_directory());
     if (description_or_error.is_error())
         return KResult(-ECONNREFUSED);
-    m_file = move(description_or_error.value());
+
+    {
+        LOCKER(sockets_by_fd().lock());
+        auto& sockets = sockets_by_fd().resource();
+        sockets.remove(m_file);
+        ASSERT(!sockets.contains(m_file));
+        m_file = move(description_or_error.value());
+        sockets.set(m_file, this);
+    }
 
     ASSERT(m_file->inode());
     if (!m_file->inode()->socket())
