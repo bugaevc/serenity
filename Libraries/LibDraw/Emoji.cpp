@@ -16,7 +16,7 @@ const Emoji* Emoji::emoji_for_codepoint(u32 codepoint)
     if (it != s_emojis.end())
         return &(*it).value;
 
-    String path = String::format("/res/emoji/U+%X", codepoint);
+    String path = String::format("/res/emoji/U+%X.png", codepoint);
 
     auto bitmap = GraphicsBitmap::load_from_file(path);
     if (!bitmap)

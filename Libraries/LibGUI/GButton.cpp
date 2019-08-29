@@ -27,6 +27,8 @@ void GButton::paint_event(GPaintEvent& event)
     GPainter painter(*this);
     painter.add_clip_rect(event.rect());
 
+    dbg() << "I'm a button, text is " << text() << " class name is " << class_name() << " parent class name is " << parent()->class_name();
+
     StylePainter::paint_button(painter, rect(), m_button_style, is_being_pressed(), is_hovered(), is_checked(), is_enabled());
 
     if (text().is_empty() && !m_icon)

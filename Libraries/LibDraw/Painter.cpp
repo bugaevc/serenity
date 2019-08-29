@@ -563,7 +563,7 @@ void Painter::draw_emoji(const Point& point, const Emoji& emoji)
 
 void Painter::draw_glyph_or_emoji(const Point& point, u32 codepoint, const Font& font, Color color)
 {
-    if (codepoint < 128) {
+    if (codepoint < 256) {
         // This looks like a regular character.
         draw_glyph(point, (char)codepoint, font, color);
         return;
