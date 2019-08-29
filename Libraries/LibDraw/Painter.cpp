@@ -1,6 +1,7 @@
 #include "Painter.h"
 #include "Font.h"
 #include "GraphicsBitmap.h"
+#include "Emoji.h"
 #include <AK/Assertions.h>
 #include <AK/StdLibExtras.h>
 #include <AK/StringBuilder.h>
@@ -8,6 +9,7 @@
 #include <math.h>
 #include <stdio.h>
 #include <unistd.h>
+#include <AK/Utf8View.h>
 
 #pragma GCC optimize("O3")
 
@@ -554,11 +556,36 @@ void Painter::draw_scaled_bitmap(const Rect& a_dst_rect, const GraphicsBitmap& s
     draw_bitmap(point, font.glyph_bitmap(ch), color);
 }
 
-void Painter::draw_text_line(const Rect& a_rect, const StringView& text, const Font& font, TextAlignment alignment, Color color, TextElision elision)
+void Painter::draw_emoji(const Point& point, const Emoji& emoji)
+{
+    blit(point, emoji.bitmap(), emoji.bitmap()->rect());
+}
+
+void Painter::draw_glyph_or_emoji(const Point& point, u32 codepoint, const Font& font, Color color)
+{
+    if (codepoint < 128) {
+        // This looks like a regular character.
+        draw_glyph(point, (char)codepoint, font, color);
+        return;
+    }
+
+    // Perhaps it's an emoji?
+    const Emoji* emoji = Emoji::emoji_for_codepoint(codepoint);
+    if (emoji == nullptr) {
+        dbg() << "Failed to find an emoji for codepoint " << codepoint;
+        draw_glyph(point, '?', font, color);
+        return;
+    }
+
+    draw_emoji(point, *emoji);
+}
+
+void Painter::draw_text_line(const Rect& a_rect, const Utf8View& text, const Font& font, TextAlignment alignment, Color color, TextElision elision)
 {
     auto rect = a_rect;
-    StringView final_text(text);
+    Utf8View final_text(text);
     String elided_text;
+    /*
     if (elision == TextElision::Right) {
         int text_width = font.width(final_text);
         if (font.width(final_text) > rect.width()) {
@@ -585,6 +612,8 @@ void Painter::draw_text_line(const Rect& a_rect, const StringView& text, const F
             }
         }
     }
+    */
+    (void) elision;
 
     if (alignment == TextAlignment::TopLeft) {
         // No-op.
@@ -604,14 +633,13 @@ void Painter::draw_text_line(const Rect& a_rect, const StringView& text, const F
     auto point = rect.location();
     int space_width = font.glyph_width(' ') + font.glyph_spacing();
 
-    for (ssize_t i = 0; i < final_text.length(); ++i) {
-        char ch = final_text.characters_without_null_termination()[i];
-        if (ch == ' ') {
+    for (u32 codepoint : final_text) {
+        if (codepoint == ' ') {
             point.move_by(space_width, 0);
             continue;
         }
-        draw_glyph(point, ch, font, color);
-        point.move_by(font.glyph_width(ch) + font.glyph_spacing(), 0);
+        draw_glyph_or_emoji(point, codepoint, font, color);
+        point.move_by(font.glyph_or_emoji_width(codepoint) + font.glyph_spacing(), 0);
     }
 }
 
@@ -620,22 +648,25 @@ void Painter::draw_text(const Rect& rect, const StringView& text, TextAlignment 
     draw_text(rect, text, font(), alignment, color, elision);
 }
 
-void Painter::draw_text(const Rect& rect, const StringView& text, const Font& font, TextAlignment alignment, Color color, TextElision elision)
+void Painter::draw_text(const Rect& rect, const StringView& raw_text, const Font& font, TextAlignment alignment, Color color, TextElision elision)
 {
-    Vector<StringView, 32> lines;
+    Utf8View text { raw_text };
+    Vector<Utf8View, 32> lines;
 
     int start_of_current_line = 0;
-    for (int i = 0; i < text.length(); ++i) {
-        auto ch = text[i];
-        if (ch == '\n') {
-            lines.append(text.substring_view(start_of_current_line, i - start_of_current_line));
-            start_of_current_line = i + 1;
-            continue;
+    for (auto it = text.begin(); it != text.end(); ++it) {
+        u32 codepoint = *it;
+        if (codepoint == '\n') {
+            int byte_offset = text.byte_offset_of(it);
+            Utf8View line = text.substring_view(start_of_current_line, byte_offset - start_of_current_line);
+            lines.append(line);
+            start_of_current_line = byte_offset + 1;
         }
     }
 
-    if (start_of_current_line != text.length()) {
-        lines.append(text.substring_view(start_of_current_line, text.length() - start_of_current_line));
+    if (start_of_current_line != text.byte_length()) {
+        Utf8View line = text.substring_view(start_of_current_line, text.byte_length() - start_of_current_line);
+        lines.append(line);
     }
 
     static const int line_spacing = 4;
