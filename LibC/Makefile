@@ -13,7 +13,8 @@ AK_OBJS = \
     ../AK/JsonParser.o \
     ../AK/MappedFile.o \
     ../AK/ELF/ELFImage.o \
-    ../AK/ELF/ELFLoader.o
+    ../AK/ELF/ELFLoader.o \
+    ../AK/ELF/ELFFinder.o
 
 LIBC_OBJS = \
        SharedBuffer.o \

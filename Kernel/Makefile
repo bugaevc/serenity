@@ -90,7 +90,8 @@ AK_OBJS = \
     ../AK/JsonArray.o \
     ../AK/JsonParser.o \
     ../AK/ELF/ELFImage.o \
-    ../AK/ELF/ELFLoader.o
+    ../AK/ELF/ELFLoader.o \
+    ../AK/ELF/ELFFinder.o
 
 CXX_OBJS = $(KERNEL_OBJS) $(VFS_OBJS) $(AK_OBJS)
 OBJS = $(CXX_OBJS) Boot/boot.ao

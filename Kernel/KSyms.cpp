@@ -136,7 +136,7 @@ void dump_backtrace()
     static bool in_dump_backtrace = false;
     if (in_dump_backtrace) {
         dbgprintf("dump_backtrace() called from within itself, what the hell is going on!\n");
-        return;
+        // return;
     }
     TemporaryChange change(in_dump_backtrace, true);
     dword ebp;

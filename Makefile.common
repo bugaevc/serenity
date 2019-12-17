@@ -2,7 +2,7 @@ ARCH_FLAGS =
 STANDARD_FLAGS = -std=c++17 -Wno-sized-deallocation -fno-sized-deallocation
 WARNING_FLAGS = -Werror -Wextra -Wall -Wundef -Wcast-qual -Wwrite-strings -Wimplicit-fallthrough
 FLAVOR_FLAGS = -fno-exceptions -fno-rtti
-OPTIMIZATION_FLAGS = -Os
+OPTIMIZATION_FLAGS = -Os -g
 
 MAKEFILE_PATH := $(abspath $(lastword $(MAKEFILE_LIST)))
 SERENITY_BASE_DIR := $(patsubst %/,%,$(dir $(MAKEFILE_PATH)))

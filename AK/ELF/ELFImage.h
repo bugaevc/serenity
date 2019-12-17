@@ -6,6 +6,12 @@
 #include <AK/OwnPtr.h>
 #include <AK/VirtualAddress.h>
 
+#if defined(KERNEL)
+#    include <Kernel/UnixTypes.h>
+#else
+#    include <sys/mman.h>
+#endif
+
 class ELFImage {
 public:
     explicit ELFImage(const byte*);
@@ -124,6 +130,18 @@ public:
     bool is_relocatable() const { return header().e_type == ET_REL; }
 
     VirtualAddress entry() const { return VirtualAddress(header().e_entry); }
+
+    virtual void note_section(VirtualAddress vaddr, size_t size)
+    {
+        (void) vaddr;
+        (void) size;
+    }
+    virtual void note_sections_done() {}
+
+    virtual dword slide() const
+    {
+        return 0;
+    }
 
     virtual void* alloc_section(VirtualAddress vaddr, size_t size, size_t alignment, int prot) = 0;
     virtual void* map_section(VirtualAddress vaddr, size_t size, size_t alignment, size_t offset_in_image, int prot) = 0;

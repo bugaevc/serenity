@@ -23,9 +23,9 @@ struct Process {
     String priority;
     unsigned virtual_size;
     unsigned physical_size;
-    unsigned nsched_since_prev;
-    unsigned cpu_percent;
-    unsigned cpu_percent_decimal;
+    unsigned nsched_since_prev { 0 };
+    unsigned cpu_percent { 0 };
+    unsigned cpu_percent_decimal { 0 };
 };
 
 struct Snapshot {

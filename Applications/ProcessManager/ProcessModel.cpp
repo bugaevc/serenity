@@ -217,6 +217,7 @@ void ProcessModel::update()
         state.name = process_object.get("name").to_string();
         state.virtual_size = process_object.get("amount_virtual").to_dword();
         state.physical_size = process_object.get("amount_resident").to_dword();
+        state.cpu_percent = 0;
         sum_nsched += nsched;
         {
             auto it = m_processes.find(pid);

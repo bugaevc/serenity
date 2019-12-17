@@ -348,9 +348,26 @@ int Process::do_exec(String path, Vector<String> arguments, Vector<String> envir
         // Okay, here comes the sleight of hand, pay close attention..
         auto old_regions = move(m_regions);
         m_regions.append(*region);
+<<<<<<< Updated upstream
         OwnPtr<ExecutableImage> image = make<ExecutableImage>(region->vaddr().as_ptr(), *this, vmo);
-        loader = make<ELFLoader>();
+        OwnPtr<ELFFinder> finder = make<ELFFinder>();
+        loader = make<ELFLoader>(move(finder));
         loader->add_image(move(image));
+=======
+        loader = make<ELFLoader>(region->vaddr().as_ptr());
+        loader->map_section_hook = [&](VirtualAddress vaddr, size_t size, size_t alignment, size_t offset_in_image, int prot) {
+            ASSERT(size);
+            ASSERT(alignment == PAGE_SIZE);
+            (void)allocate_region_with_vmo(vaddr, size, vmo.copy_ref(), offset_in_image, description->absolute_path(), prot);
+            return vaddr.as_ptr();
+        };
+        loader->alloc_section_hook = [&](VirtualAddress vaddr, size_t size, size_t alignment, int prot) {
+            ASSERT(size);
+            ASSERT(alignment == PAGE_SIZE);
+            (void)allocate_region(vaddr, size, description->absolute_path(), prot);
+            return vaddr.as_ptr();
+        };
+>>>>>>> Stashed changes
         bool success = loader->load();
         if (!success || !loader->entry().get()) {
             m_page_directory = move(old_page_directory);

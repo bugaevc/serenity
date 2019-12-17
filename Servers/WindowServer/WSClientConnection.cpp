@@ -369,7 +369,7 @@ void WSClientConnection::handle_request(const WSAPIGetWallpaperRequest&)
     WSAPI_ServerMessage response;
     response.type = WSAPI_ServerMessage::Type::DidGetWallpaper;
     ASSERT(path.length() < (int)sizeof(response.text));
-    strncpy(response.text, path.characters(), path.length());
+    memcpy(response.text, path.characters(), path.length());
     response.text_length = path.length();
     post_message(response);
 }

@@ -190,7 +190,7 @@ int vsscanf(const char* buf, const char* s, va_list ap)
                         }
                     }
                 }
-                strncpy(tmp, buf, width);
+                memcpy(tmp, buf, width);
                 tmp[width] = '\0';
                 buf += width;
                 if (!noassign) {

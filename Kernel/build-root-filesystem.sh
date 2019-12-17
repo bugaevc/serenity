@@ -57,6 +57,7 @@ echo "done"
 
 echo -n "installing userland... "
 find ../Userland/ -type f -executable -exec cp {} mnt/bin/ \;
+cp ../Userland/libtest{,2}.so mnt/usr/lib/
 chmod 4755 mnt/bin/su
 echo "done"
 
